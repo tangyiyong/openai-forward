@@ -4,14 +4,14 @@ build-backend = "hatchling.build"
 
 [project]
 name = "openai_forward"
-description = "🚀 Openai api forward · OpenAI 接口转发服务 · stream forwarding"
+description = "🚀 OpenAI-Forward 是一个专为大型语言模型设计的高级转发代理，提供包括用户请求速率控制、Token速率限制和自定义API密钥等增强功能。该服务可用于代理本地模型和云端模型。OpenAI API Reverse Proxy"
 authors = [
     { name = "kunyuan", email = "beidongjiedeguang@gmail.com" },
 ]
 license = "MIT"
 requires-python = ">=3.6"
 readme = "README.md"
-keywords = ["openai", "chatgpt", "openai-api", "openai-proxy", "forward", "streaming-api", "fastapi", "python"]
+keywords = ["openai", "chatgpt", "openai-api", "openai-proxy", "OpenAI API Forwarding", "streaming-api", "fastapi", "python"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Operating System :: OS Independent",
@@ -19,43 +19,68 @@ classifiers = [
 ]
 
 dependencies = [
-    "loguru",
-    "sparrow-python>=0.1.3",
-    "fastapi",
-    "uvicorn",
-    "orjson",
+    "loguru>=0.7.0",
+    "fastapi>=0.90.0",
+    "uvicorn>=0.21.0",
+    "orjson>=3.9",
     "python-dotenv",
-    "httpx",
+    "rich",
+    "fire",
     "pytz",
-    "chardet",
+    "slowapi==0.1.8",
+    "aiohttp>=3.8.5",
 ]
 
 dynamic = ["version"]
 
 [project.urls]
-Homepage = "https://github.com/beidongjiedeguang/openai-forward"
-Documentation = "https://github.com/beidongjiedeguang/openai-forward#openai-forward"
-Issues = "https://github.com/beidongjiedeguang/openai-forward/issues"
-Source = "https://github.com/beidongjiedeguang/openai-forward"
+Homepage = "https://github.com/KenyonY/openai-forward"
+Documentation = "https://github.com/KenyonY/openai-forward#openai-forward"
+Issues = "https://github.com/KenyonY/openai-forward/issues"
+Source = "https://github.com/KenyonY/openai-forward"
 
 [project.optional-dependencies]
-ssl = [
-    "certbot"
+test = [
+    "pytest",
+    "pytest-aiohttp",
+    "psutil",
+    "openai>=0.28.0",
+    "sparrow-python",
 ]
-chatgpt = [
-    "revChatGPT",
+
+benchmark = [
+    "openai>=0.28.0",
+    "tiktoken",
 ]
-bard = [
-    "GoogleBard",
+
+database = [
+    "lmdb>=1.4.1",
+    "plyvel>=1.5.0",
+    "rocksdict>=0.3.13",
 ]
-edge = [
-    "EdgeGPT",
+
+lmdb = [
+    "lmdb>=1.4.1",
+]
+
+rocksdb = [
+    "rocksdict>=0.3.13",
+]
+
+leveldb = [
+    "plyvel>=1.5.0",
+]
+
+dev = [
+    "openai>=0.28.0",
+    "sparrow-python",
+    "schedule",
 ]
 
 [project.scripts]
 openai_forward = "openai_forward.__main__:main"
 openai-forward = "openai_forward.__main__:main"
-aifwd = "openai_forward.__main__:main"
+aifd = "openai_forward.__main__:main"
 
 [tool.hatch.version]
 path = "openai_forward/__init__.py"
@@ -69,11 +94,6 @@ include = [
 ]
 exclude = [
 ]
-
-artifacts = [
-    "openai_forward/web/index.js",
-]
-
 
 [tool.hatch.build.targets.wheel]
 packages = ["openai_forward"]

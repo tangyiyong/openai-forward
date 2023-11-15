@@ -1,21 +1,28 @@
-.PHONY: start build push run down test twine log pull
+.PHONY: monitor start build push run down test twine log pull
 
 image := "beidongjiedeguang/openai-forward:latest"
 container := "openai-forward-container"
 compose_path := "docker-compose.yaml"
 
+monitor:
+	@./scripts/ai-forward-monitor.sh
+
+#stop-monitor:
+#	@pkill -f ai-forward-monitor.sh
+#	@pkill aifd
+
 start:
-	docker run -d \
+	@docker run -d \
     --name $(container) \
     --env-file .env \
-    -p 27001:8000 \
-    -v $(shell pwd)/Log-caloi-top:/home/openai-forward/Log \
+    -p 8000:8000 \
+    -v $(shell pwd)/Log:/home/openai-forward/Log \
     -v $(shell pwd)/openai_forward:/home/openai-forward/openai_forward \
     $(image)
-
+	@make log
 
 exec:
-	docker exec -it $(container) bash
+	docker exec -it $(container) sh
 
 log:
 	docker logs -f $(container)
@@ -39,14 +46,14 @@ twine:
 	@twine upload dist/*
 	@rm -rf dist/*
 
-start-web:
-	@openai_forward node --port=9099 --base_url="https://api.openai.com"
-
 build:
-	docker build --tag $(image) -f docker/Dockerfile .
+	docker build --tag $(image) .
 
 build-push:
-	docker buildx build --push --platform linux/arm64/v8,linux/amd64 --tag $(image) -f docker/Dockerfile .
+	docker buildx build --push --platform linux/arm64/v8,linux/amd64 --tag $(image) .
 
 pull:
 	 docker pull $(image)
+
+deploy:
+	vercel --prod

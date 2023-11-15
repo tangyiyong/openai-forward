@@ -12,10 +12,16 @@ ssl/
 chat.yaml
 chat_*.yaml
 
-.env.example
 Log/
 Log-caloi-top/
 dist/
+CACHE_DB/
+CACHE_LMDB/
+CACHE_ROCKSDB/
+CACHE_LEVELDB/
+
+.run/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -144,3 +150,4 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+.vercel
