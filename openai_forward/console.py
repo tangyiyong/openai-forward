@@ -1,6 +1,10 @@
+from typing import List
+
 from rich import print
 from rich.panel import Panel
 from rich.table import Table
+
+from . import __version__
 
 
 def print_startup_info(base_url, route_prefix, api_key, fwd_key, /, style, **kwargs):
@@ -18,9 +22,9 @@ def print_startup_info(base_url, route_prefix, api_key, fwd_key, /, style, **kwa
         api_key = True if len(api_key) else False
     if not isinstance(fwd_key, str):
         fwd_key = True if len(fwd_key) else False
-    table = Table(title="", box=None, width=50)
+    table = Table(title="", box=None, width=61)
 
-    matrcs = {
+    metric = {
         "base url": {
             'value': base_url,
         },
@@ -35,14 +39,22 @@ def print_startup_info(base_url, route_prefix, api_key, fwd_key, /, style, **kwa
             'style': "#62E883" if fwd_key or not api_key else "red",
         },
     }
-    table.add_column("", justify='left', width=10)
+    table.add_column("", justify='left', width=12)
     table.add_column("", justify='left')
-    for key, value in matrcs.items():
-        table.add_row(key, value['value'], style=value.get('style', style))
+    for key, value in metric.items():
+        if value['value']:
+            table.add_row(key, value['value'], style=value.get('style', style))
     for key, value in kwargs.items():
-        table.add_row(key, str(value), style=style)
+        if value:
+            table.add_row(key, str(value), style=style)
 
-    print(Panel(table, title="🤗 openai-forward is ready to serve! ", expand=False))
+    print(
+        Panel(
+            table,
+            title=f"🤗 openai-forward (v{__version__}) is ready to serve! ",
+            expand=False,
+        )
+    )
 
 
 def print_rate_limit_info(
@@ -56,7 +68,7 @@ def print_rate_limit_info(
     """
     Print rate limit information.
     """
-    table = Table(title="", box=None, width=50)
+    table = Table(title="", box=None)
     table.add_column("")
     table.add_column("", justify='left')
     backend = backend or "memory"

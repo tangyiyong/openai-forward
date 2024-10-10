@@ -7,7 +7,7 @@
 <div align="center">
 
 Deploy with one click to Render   
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/beidongjiedeguang/openai-forward)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/KenyonY/openai-forward)
 
 [pip Deployment](#pip-deployment) |
 [docker Deployment](#docker-deployment) |
@@ -24,6 +24,8 @@ This document offers several deployment methods:
 **One-click Free Cloud Deployment**
 
 1. [Render One-click Deployment](#render-one-click-deployment)
+2. [CloudFlare AI Gateway](https://developers.cloudflare.com/ai-gateway/)
+3. More Deployment: https://github.com/KenyonY/openai-forward/blob/0.5.x/deploy.md
 
 ---
 ## pip Deployment
@@ -65,7 +67,7 @@ proxy_buffering off;
 ```
 
 <a>
-   <img src="https://raw.githubusercontent.com/beidongjiedeguang/openai-forward/main/.github/images/separators/aqua.png" height=8px width="100%">
+   <img src="https://raw.githubusercontent.com/KenyonY/openai-forward/main/.github/images/separators/aqua.png" height=8px width="100%">
 </a>
 
 ## Docker Deployment
@@ -77,13 +79,12 @@ docker run -d -p 8000:8000 beidongjiedeguang/openai-forward:latest
 This will map the host's 8000 port. Access the service via `http://{ip}:8000`.  
 The log path inside the container is `/home/openai-forward/Log/`. It can be mapped when starting up.
 
-Note: Similarly, the default API key can be passed in as an environment variable OPENAI_API_KEY=sk-xxx during startup using the -e flag.  
-For SSL setup, refer to the above. Environment variable configuration can be found [here](README_EN.md#configuration).
+Note: For SSL setup, refer to the above. Environment variable configuration can be found [here](README_EN.md#configuration).
 
 ## Source Code Deployment
 
 ```bash
-git clone https://github.com/beidongjiedeguang/openai-forward.git --depth=1
+git clone https://github.com/KenyonY/openai-forward.git --depth=1
 cd openai-forward
 
 pip install -e .
@@ -92,11 +93,11 @@ aifd run
 For SSL setup, refer to the above.
 
 <a>
-   <img src="https://raw.githubusercontent.com/beidongjiedeguang/openai-forward/main/.github/images/separators/aqua.png" height=8px width="100%">
+   <img src="https://raw.githubusercontent.com/KenyonY/openai-forward/main/.github/images/separators/aqua.png" height=8px width="100%">
 </a>
 
 ## Render One-click Deployment
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/beidongjiedeguang/openai-forward)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/KenyonY/openai-forward)
 
 Render might be considered the easiest of all deployment methods, and the domain it generates can be directly accessed domestically!
 

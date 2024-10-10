@@ -1,101 +1,70 @@
-import openai
+from openai import OpenAI
 from rich import print
 from sparrow import MeasureTime, yaml_load  # pip install sparrow-python
 
 config = yaml_load("config.yaml", rel_path=True)
 print(f"{config=}")
-openai.api_base = config["api_base"]
-openai.api_key = config["api_key"]
+
+client = OpenAI(
+    api_key=config['api_key'],
+    base_url=config['api_base'],
+)
 
 stream = True
-# stream = False
 
 n = 1
 
-# debug = True
 debug = False
-
-# is_function_call = True
-is_function_call = False
-caching = True
 
 max_tokens = None
 
-user_content = """
-用c实现目前已知最快平方根算法
-"""
-# user_content = "ni shi shei"
-user_content = "ni hao"
+
+queries = {
+    0: "用c实现目前已知最快平方根导数算法",
+    1: "既然快递要 3 天才到，为什么不把所有的快递都提前 3 天发？",
+    2: "只切一刀，如何把四个橘子分给四个小朋友？",
+    3: "最初有1000千克的蘑菇，其中99%的成分是水。经过几天的晴天晾晒后，蘑菇中的水分含量现在是98%，蘑菇中减少了多少水分？",
+    4: "哥哥弟弟百米赛跑，第一次从同一起点起跑，哥哥到达终点时领先弟弟一米获胜，第二次哥哥从起点后退一米处开始起跑，问结果如何?",
+    5: "光散射中的Mie理论的理论公式是怎样的？请用latex语法表示它公式使用$$符号包裹。",
+    6: "Write down the most romantic sentence you can think of.",
+    7: "为什么我爸妈结婚的时候没邀请我参加婚礼？",
+    8: "一个人自杀了，这个世界上是多了一个自杀的人，还是少了一个自杀的人",
+}
+
+user_content = queries[8]
+
+# model = "gpt-3.5-turbo"
+model = "gpt-4o-mini"
+# model = "deepseek-chat"
+# model="gpt-4o"
+# model="gpt-4"
 
 mt = MeasureTime().start()
 
-
-# function_call
-if is_function_call:
-    functions = [
-        {
-            "name": "get_current_weather",
-            "description": "Get the current weather in a given location",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "location": {
-                        "type": "string",
-                        "description": "The city and state, e.g. San Francisco, CA",
-                    },
-                    "unit": {"type": "string", "enum": ["celsius", "fahrenheit"]},
-                },
-                "required": ["location"],
-            },
-        }
-    ]
-    resp = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {"role": "user", "content": "What's the weather like in Boston today?"}
-        ],
-        functions=functions,
-        function_call="auto",  # auto is default, but we'll be explicit
-        stream=stream,
-        request_timeout=30,
-    )
-
-else:
-    resp = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        # model="gpt-4",
-        messages=[
-            {"role": "user", "content": user_content},
-        ],
-        stream=stream,
-        n=n,
-        max_tokens=max_tokens,
-        request_timeout=30,
-        caching=caching,
-    )
+resp = client.chat.completions.create(
+    model=model,
+    messages=[
+        {"role": "user", "content": user_content},
+    ],
+    stream=stream,
+    n=n,
+    max_tokens=max_tokens,
+    timeout=30,
+    # extra_body={"caching": True},
+)
 
 if stream:
     if debug:
         for chunk in resp:
             print(chunk)
     else:
-        chunk_message = next(resp)['choices'][0]['delta']
-        if is_function_call:
-            function_call = chunk_message["function_call"]
-            name = function_call["name"]
-            print(f"{chunk_message['role']}: \n{name}: ")
-        else:
-            print(f"{chunk_message['role']}: ")
-        for chunk in resp:
-            chunk_message = chunk['choices'][0]['delta']
-            content = ""
-            if is_function_call:
-                function_call = chunk_message.get("function_call", "")
-                if function_call:
-                    content = function_call.get("arguments", "")
-
-            else:
-                content = chunk_message.get("content", "")
+        for idx, chunk in enumerate(resp):
+            chunk_message = chunk.choices[0].delta or ""
+            if idx == 0:
+                mt.show_interval("tcp time:")
+                print(f"{chunk_message.role}: ")
+                continue
+            content = chunk_message.content or ""
             print(content, end="")
         print()
 else:

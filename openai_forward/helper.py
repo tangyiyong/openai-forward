@@ -12,6 +12,66 @@ from fastapi import Request
 from rich import print
 
 
+class InfiniteSet:
+    def __contains__(self, item):
+        return True
+
+
+def get_inner_ip():
+    import socket
+
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+        s.connect(('8.8.8.8', 80))
+        return s.getsockname()[0]
+
+
+def urljoin(base_url, *relative_urls):
+    """
+    This function concatenates a base URL with any number of relative URL segments, producing a complete URL string.
+    It's designed to mimic the behavior of `os.path.join()` but for URL paths.
+
+    Args:
+        base_url (str): This is the starting point of the URL to which the relative URLs will be appended.
+        *relative_urls (str): An arbitrary number of relative URL segments to be appended to the base_url.
+    Returns
+        (string): A string representing the fully concatenated URL.
+    """
+
+    if base_url.endswith('/'):
+        base_url = base_url[:-1]
+
+    urls = [base_url]
+    for relative_url in relative_urls:
+        if relative_url == "":
+            continue
+
+        if relative_url.startswith('/'):
+            relative_url = relative_url[1:]
+
+        urls.append(relative_url)
+
+    return "/".join(urls)
+
+
+def wait_for_serve_start(url, timeout=20, suppress_exception=False):
+    import httpx
+
+    start_time = time.time()
+    while True:
+        try:
+            response = httpx.get(url)
+            response.raise_for_status()
+            break
+        except Exception:
+            time.sleep(0.3)
+            if time.time() - start_time > timeout:
+                if suppress_exception:
+                    print("Warning: Server didn't start in time")
+                    return
+                else:
+                    raise RuntimeError("Server didn't start in time")
+
+
 def get_client_ip(request: Request):
     if "x-forwarded-for" in request.headers:
         return request.headers["x-forwarded-for"].split(",")[0]
@@ -99,12 +159,15 @@ def env2list(env_name: str, sep=","):
     return str2list(os.environ.get(env_name, "").strip(), sep=sep)
 
 
-def env2dict(env_name: str) -> Dict:
+def env2dict(env_name: str, _default=None) -> Dict:
     import json
+
+    if _default is None:
+        _default = {}
 
     env_str = os.environ.get(env_name, "").strip()
     if not env_str:
-        return {}
+        return _default
     return json.loads(env_str)
 
 
@@ -128,8 +191,8 @@ def get_matches(messages: List[Dict], assistants: List[Dict]):
         "model": msg.get("model"),
         "temperature": msg.get("temperature", 1),
         "messages": msg.get("messages"),
-        "functions": msg.get("functions"),
-        "is_function_call": ass.get("is_function_call"),
+        "tools": msg.get("tools"),
+        "is_tool_calls": ass.get("is_tool_calls"),
         "assistant": ass.get("assistant"),
     }
 
